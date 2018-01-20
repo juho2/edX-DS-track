@@ -1,0 +1,23 @@
+--SELECT TEXT, [CREATED BY], [FAVOURITE COUNT], [RETWEET COUNT], [TWEETLENGTH], KEYWORD, [TIMESTAMP] AS [COLLECTED AT], DATE.TIME AS [CREATED AT]
+--, System.TimeStamp AS [RECEIVED AT]
+--INTO blobstor
+--FROM eventhub
+--WHERE [RETWEET COUNT] > 2 AND [TWEETLENGTH] < 140
+
+--SELECT System.TimeStamp AS WINDOWEND, KEYWORD, COUNT(*) AS Count
+--FROM eventhub TIMESTAMP BY Date.Time
+--GROUP BY KEYWORD, TumblingWindow(mi,10)
+
+--SELECT System.TimeStamp AS WINDOWEND, Topic, COUNT(*) AS Count
+--FROM eventhub TIMESTAMP BY createdat
+--GROUP BY Topic, TumblingWindow(second,10)
+
+WITH step1 AS (
+    SELECT Text, sentiment(Text) as Result, Topic, CreatedAt
+    FROM eventhub
+)
+
+SELECT avg(Result.[Scored Probabilities]) as AvgSentiment
+INTO blobstor
+FROM step1
+GROUP BY Topic, TumblingWindow(second,10)

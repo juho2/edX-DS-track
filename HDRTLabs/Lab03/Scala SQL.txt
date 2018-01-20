@@ -1,0 +1,30 @@
+// import SQL types
+import org.apache.spark.sql.types._;
+import org.apache.spark.sql.Row;
+
+// load text file
+val csv = sc.textFile(
+    "wasb:///HdiSamples/HdiSamples/SensorSampleData/hvac/HVAC.csv")
+
+// parse data
+val data = csv.map(p => p.split(",")).filter(p => p(0) != "Date").map(p => Row(p(0), p(1), p(2).toInt, p(3).toInt, p(4).toInt))
+
+// create schema
+val schma = StructType(List(
+  StructField("Date", StringType, false),
+  StructField("Time", StringType, false),
+  StructField("TargetTemp", IntegerType, false),
+  StructField("ActualTemp", IntegerType, false),
+  StructField("BuildingID", IntegerType, false)))
+
+
+// create data farme and register table
+val df = sqlContext.createDataFrame(data,schma)
+df.registerTempTable("tmpHvac")
+
+// query table
+val readings = sqlContext.sql("SELECT * FROM tmpHvac")
+readings.show()
+
+
+

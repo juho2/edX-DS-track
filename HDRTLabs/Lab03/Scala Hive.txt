@@ -1,0 +1,6 @@
+// Create a dataframe from a Hive query
+val calls = sqlContext.sql("""SELECT devicemodel, COUNT(*) AS calls
+       FROM hivesampletable
+       GROUP BY devicemodel
+       ORDER BY calls DESC """)
+calls.show()
